@@ -1,0 +1,381 @@
+<title>Chapter Quest</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#2f5be0">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Caveat:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: a school-notebook page. Graph-paper ground, sticker-edged cards, highlighter and red-pen accents. */
+:root{
+  --bg:#f2f6fb; --grid:#d9e4f1; --ink:#14213d; --muted:#55657f; --card:#ffffff; --line:#c3d1e3;
+  --hl:#ffd93d; --on-hl:#14213d; --pen:#d93a3f; --ok:#17855a; --okbg:#dcf4e8; --badbg:#fde2e2;
+  --blue:#2f5be0; --on-blue:#ffffff; --soft:#e8eff9;
+  --f-disp:'Bricolage Grotesque','Trebuchet MS',system-ui,sans-serif;
+  --f-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-note:'Caveat','Segoe Print','Bradley Hand',cursive;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14231e; --grid:#1f362e; --ink:#eef3ea; --muted:#9fb5aa; --card:#1b2e27; --line:#35514a;
+    --hl:#f3d34a; --on-hl:#14231e; --pen:#ff8080; --ok:#62d6a0; --okbg:#1d4636; --badbg:#4a2a2a;
+    --blue:#93b4ff; --on-blue:#0f1c18; --soft:#223a32; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14231e; --grid:#1f362e; --ink:#eef3ea; --muted:#9fb5aa; --card:#1b2e27; --line:#35514a;
+  --hl:#f3d34a; --on-hl:#14231e; --pen:#ff8080; --ok:#62d6a0; --okbg:#1d4636; --badbg:#4a2a2a;
+  --blue:#93b4ff; --on-blue:#0f1c18; --soft:#223a32; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background-color:var(--bg); color:var(--ink); font:16px/1.5 var(--f-body);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px; min-height:100%;
+  padding-block:0; padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-disp);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,6vw,3.4rem);font-weight:800}
+h2{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:800}
+h3{font-size:1.1rem;font-weight:700}
+.mono{font-variant-numeric:tabular-nums;font-weight:800}
+.hl{background:var(--hl);color:var(--on-hl);padding:0 .22em;border-radius:6px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.muted{color:var(--muted)}
+
+/* header */
+.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:16px 0}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-disp);font-weight:800;font-size:1.3rem}
+.brand svg{width:34px;height:34px}
+.me{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lvl{font-weight:800;background:var(--hl);color:var(--on-hl);border-radius:999px;padding:2px 12px;font-size:.9rem}
+.xpbar{width:110px;height:12px;border:2px solid var(--ink);border-radius:99px;overflow:hidden;background:var(--card)}
+.xpbar i{display:block;height:100%;width:0;background:var(--blue);transition:width .5s}
+.tbtn{background:none;border:2px solid var(--line);border-radius:99px;padding:3px 12px;cursor:pointer;font-weight:700;font-size:.85rem}
+.tbtn:hover{border-color:var(--ink)}
+
+/* buttons & cards */
+.card{background:var(--card);border:2px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink);padding:20px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--ink);border-radius:12px;background:var(--card);padding:10px 18px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+.btn.primary{background:var(--blue);color:var(--on-blue)}
+.btn.big{font-size:1.1rem;padding:13px 26px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.link{background:none;border:0;color:var(--blue);font-weight:800;cursor:pointer;padding:4px;text-decoration:underline}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.err{color:var(--pen);font-weight:700;margin:10px 0 0}
+
+/* home */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:center;padding:12px 0 28px}
+.hero p.lead{font-size:1.1rem;color:var(--muted);max-width:46ch;margin:14px 0 20px}
+.drop{display:block;border:3px dashed var(--ink);border-radius:18px;background:var(--card);padding:26px 18px;text-align:center;cursor:pointer;transition:background .15s}
+.drop:hover,.drop.over{background:var(--soft)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop:focus-within{outline:3px solid var(--blue);outline-offset:3px}
+.drop b{font-family:var(--f-disp);font-size:1.3rem;display:block}
+.drop span{color:var(--muted)}
+details.paste{margin-top:12px}
+details.paste summary{cursor:pointer;font-weight:800;color:var(--blue)}
+details.paste textarea{width:100%;min-height:110px;margin:10px 0;border:2px solid var(--ink);border-radius:12px;padding:10px;background:var(--card);resize:vertical}
+.demo{transform:rotate(1.5deg)}
+.demo .prompt{font-size:1.05rem}
+.feats{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;padding:0;list-style:none}
+.feats li{border:2px solid var(--line);border-radius:99px;padding:3px 12px;font-weight:700;font-size:.88rem;background:var(--card)}
+.sec{padding:10px 0 40px}
+.sec h2{margin-bottom:14px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.badge{display:flex;gap:12px;align-items:center;border:2px solid var(--line);border-radius:14px;padding:12px;background:var(--card);min-width:0}
+.badge .ic{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--muted);font-family:var(--f-disp);font-weight:800}
+.badge.on{border-color:var(--ink)}
+.badge.on .ic{background:var(--hl);color:var(--on-hl)}
+.badge small{display:block;color:var(--muted);line-height:1.3}
+.badge:not(.on){opacity:.65}
+
+/* loading */
+.center{text-align:center;padding:70px 0}
+.spin{width:54px;height:54px;border:6px solid var(--line);border-top-color:var(--blue);border-radius:50%;margin:0 auto 16px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* setup */
+.setup{display:grid;gap:18px;padding:12px 0 40px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{border:2px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--card)}
+.stat b{display:block;font-family:var(--f-disp);font-size:1.6rem}
+fieldset{border:0;padding:0;margin:0 0 16px;min-width:0}
+legend{font-weight:800;margin-bottom:8px;padding:0}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.seg span{display:block;border:2px solid var(--ink);border-radius:99px;padding:6px 16px;font-weight:700;background:var(--card)}
+.seg input:checked+span{background:var(--blue);color:var(--on-blue)}
+.seg input:focus-visible+span{outline:3px solid var(--blue);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);border-radius:99px;padding:2px 12px;font-weight:700;background:var(--card)}
+
+/* quiz */
+.qwrap{max-width:720px;margin:0 auto;padding:6px 0 50px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.prog{display:flex;align-items:center;gap:10px;flex:1;min-width:150px}
+.bar{flex:1;height:12px;border:2px solid var(--ink);border-radius:99px;overflow:hidden;background:var(--card)}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .4s}
+.hudr{display:flex;gap:8px;align-items:center}
+.hearts{display:flex;gap:3px}
+.hearts svg{width:22px;height:22px}
+.timer{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:12px}
+.timer i{display:block;height:100%;width:100%;background:var(--blue)}
+.timer i.low{background:var(--pen)}
+.qmeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.qmeta .link{margin-left:auto}
+.tag{background:var(--hl);color:var(--on-hl);border-radius:6px;padding:1px 10px;font-weight:800;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
+.tag.ghost{background:var(--soft);color:var(--ink)}
+.prompt{font-size:1.25rem;font-weight:700;line-height:1.45;margin:0 0 16px;overflow-wrap:anywhere}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;border:2px solid var(--ink);border-radius:12px;background:var(--card);padding:12px 14px;cursor:pointer;font-weight:700;box-shadow:0 3px 0 var(--ink);transition:transform .08s}
+.opt:hover:not([disabled]){transform:translateY(-1px);background:var(--soft)}
+.opt kbd{flex:none;width:28px;height:28px;border-radius:8px;background:var(--soft);display:grid;place-items:center;font:800 .85rem var(--f-body);border:2px solid var(--line)}
+.opt span{min-width:0;overflow-wrap:anywhere}
+.opt.ok{background:var(--okbg);border-color:var(--ok);box-shadow:0 3px 0 var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--pen);box-shadow:0 3px 0 var(--pen);animation:shake .3s}
+.opt.gone{opacity:.25;pointer-events:none}
+.opt[disabled]{cursor:default}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.tiles{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tiles span{width:42px;height:48px;display:grid;place-items:center;border:2px solid var(--ink);border-radius:10px;background:var(--hl);color:var(--on-hl);font:800 1.4rem var(--f-disp);text-transform:uppercase;box-shadow:0 3px 0 var(--ink)}
+.sform{display:flex;gap:10px;flex-wrap:wrap}
+.sform input{flex:1;min-width:160px;border:2px solid var(--ink);border-radius:12px;padding:10px 14px;background:var(--card);font-weight:700;font-size:1.1rem}
+.sform input.ok{background:var(--okbg);border-color:var(--ok)}
+.sform input.bad{background:var(--badbg);border-color:var(--pen)}
+.qtools{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap}
+.hinttext{margin:12px 0 0;font-weight:700;color:var(--blue)}
+.fb{margin-top:16px;border-top:2px dashed var(--line);padding-top:14px}
+.note{font:700 1.7rem/1.1 var(--f-note);color:var(--pen);margin:0 0 6px;transform:rotate(-1.5deg);transform-origin:left}
+.note.good{color:var(--ok)}
+.src{margin:0 0 14px;color:var(--muted);font-size:.95rem;overflow-wrap:anywhere}
+.bump{animation:bump .35s}
+@keyframes bump{40%{transform:scale(1.25)}}
+
+/* result */
+.res{max-width:760px;margin:0 auto;padding:10px 0 50px;display:grid;gap:18px}
+.stars{display:flex;gap:6px;justify-content:center}
+.stars svg{width:54px;height:54px}
+.big{font-family:var(--f-disp)}
+.score{font-size:3.4rem;font-weight:800;text-align:center;line-height:1}
+.miss{border:2px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;background:var(--card)}
+.miss p{margin:0 0 4px;overflow-wrap:anywhere}
+.miss .wrong{color:var(--pen);font-weight:700}
+.miss .right{color:var(--ok);font-weight:700}
+details.mist summary{cursor:pointer;font-weight:800;font-size:1.05rem}
+.newb{background:var(--hl);color:var(--on-hl);border-radius:12px;padding:8px 14px;font-weight:800;display:inline-block;margin:4px 6px 0 0}
+
+/* flashcards */
+.fc{max-width:620px;margin:0 auto;padding:6px 0 50px;display:grid;gap:16px}
+.flip{perspective:900px}
+.face{min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:10px;cursor:pointer;text-align:center;font-size:1.2rem;font-weight:700;overflow-wrap:anywhere}
+.face .term{font:800 2.2rem var(--f-disp)}
+
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 18px;font-weight:800;opacity:0;transition:.3s;z-index:30;pointer-events:none;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:20}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr}
+  .demo{transform:none}
+  .xpbar{width:80px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* profile */
+.avatar{width:30px;height:30px;border-radius:50%;display:inline-grid;place-items:center;font:800 .95rem var(--f-disp);color:#14213d;border:2px solid var(--ink);flex:none}
+.avatar.lg{width:84px;height:84px;font-size:2.4rem;box-shadow:0 4px 0 var(--ink)}
+.pbtn{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:2px solid var(--ink);border-radius:99px;padding:3px 14px 3px 4px;cursor:pointer;font-weight:800;max-width:170px}
+.pbtn span.nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prof{max-width:760px;margin:0 auto;padding:6px 0 50px;display:grid;gap:18px}
+.phead{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.phead>div{min-width:0}
+.pname{width:100%;max-width:340px;border:2px solid var(--ink);border-radius:12px;padding:9px 14px;background:var(--card);font:800 1.2rem var(--f-disp)}
+.rank{display:inline-block;background:var(--hl);color:var(--on-hl);border-radius:99px;padding:1px 12px;font-weight:800;font-size:.9rem;margin-top:6px}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatches label{position:relative}
+.swatches input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.swatches span{display:block;width:34px;height:34px;border-radius:50%;border:3px solid var(--line)}
+.swatches input:checked+span{border-color:var(--ink);box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--ink)}
+.swatches input:focus-visible+span{outline:3px solid var(--blue);outline-offset:4px}
+.dev{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.dev .avatar{background:var(--blue);color:var(--on-blue)}
+.dev h3{margin:0}
+.foot{text-align:center;color:var(--muted);padding:6px 0 36px;font-weight:700}
+.foot b{color:var(--ink)}
+button.badge{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
+button.badge:hover{background:var(--soft)}
+</style>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div id="toast" role="status"></div>
+
+<div class="wrap">
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 9c-3-3-9-4-15-3v24c6-1 12 0 15 3 3-3 9-4 15-3V6c-6-1-12 0-15 3z" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/><path d="M20 9v24" stroke="var(--ink)" stroke-width="2.5"/><path d="M9 14c3 0 6 .5 8 1.5M9 20c3 0 6 .5 8 1.5" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round"/><path d="M31 8l1.6 3.4 3.7.4-2.8 2.5.8 3.7L31 16l-3.3 2 .8-3.7-2.8-2.5 3.7-.4z" fill="var(--hl)" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    <span>Chapter Quest</span>
+  </div>
+  <div class="me">
+    <span class="lvl">Level <span id="lvl" class="mono">1</span></span>
+    <div class="xpbar" role="progressbar" aria-label="Progress to next level" id="xpbar"><i id="xpfill"></i></div>
+    <span id="xptxt" class="mono muted">0 XP</span>
+    <button class="pbtn" id="prof" type="button" aria-label="Open profile"><span class="avatar" id="pav">S</span><span class="nm" id="pnm">Profile</span></button>
+    <button class="tbtn" id="snd" aria-pressed="true">Sound on</button>
+  </div>
+</header>
+
+<main>
+<!-- HOME -->
+<section id="v-home">
+  <div class="hero">
+    <div>
+      <h1>Turn any chapter into a <span class="hl">quiz game</span></h1>
+      <p class="lead">Drop in a PDF from your textbook or notes. Chapter Quest reads it and builds questions from your own pages. Earn XP, keep your streak and unlock badges.</p>
+      <label class="drop" id="drop" for="file">
+        <input type="file" id="file" accept="application/pdf,.pdf">
+        <b>Drop your PDF here</b>
+        <span>or tap to choose a file. It is read on your device and never uploaded.</span>
+      </label>
+      <p class="err" id="err" role="alert" hidden></p>
+      <details class="paste" id="pastebox">
+        <summary>No PDF? Paste text instead</summary>
+        <textarea id="pastetxt" aria-label="Paste your notes" placeholder="Paste a few paragraphs from your notes or textbook."></textarea>
+        <button class="btn" id="pastego" type="button">Make my quiz</button>
+      </details>
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="sample" type="button">Try a sample chapter</button><span class="muted">Photosynthesis, 2 pages</span></div>
+      <ul class="feats">
+        <li>Fill in the blank</li><li>True or false</li><li>Unscramble</li><li>50:50 hints</li><li>Streak bonus</li><li>Flashcards</li><li>Listen mode</li>
+      </ul>
+    </div>
+    <div class="card demo" aria-label="Example question">
+      <div class="qmeta"><span class="tag">Fill in the blank</span><span class="tag ghost">Page 1</span></div>
+      <p class="prompt">_____ is the green pigment in chloroplasts that absorbs sunlight, mostly in the red and blue wavelengths.</p>
+      <div class="opts" id="demoopts">
+        <button class="opt" data-ok="0"><kbd>1</kbd><span>Xylem</span></button>
+        <button class="opt" data-ok="1"><kbd>2</kbd><span>Chlorophyll</span></button>
+        <button class="opt" data-ok="0"><kbd>3</kbd><span>Stomata</span></button>
+      </div>
+      <p class="note good" id="demonote" style="margin-top:12px" hidden>Spot on! +120 XP</p>
+    </div>
+  </div>
+  <div class="sec" id="recents" hidden>
+    <h2>Recent chapters</h2>
+    <div class="badges" id="reclist"></div>
+  </div>
+  <div class="sec">
+    <h2>Your badges</h2>
+    <div class="badges" id="badges"></div>
+  </div>
+</section>
+
+<!-- LOADING -->
+<section id="v-load" class="center" hidden>
+  <div class="spin"></div>
+  <h2>Reading your chapter</h2>
+  <p class="muted" id="loadmsg" aria-live="polite">Starting up</p>
+</section>
+
+<!-- SETUP -->
+<section id="v-setup" class="setup" hidden>
+  <div>
+    <button class="link" id="back1">Choose a different file</button>
+    <h2 id="docname" style="margin-top:6px"></h2>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div class="card">
+    <fieldset><legend>How many questions?</legend><div class="seg" id="seg-n"></div></fieldset>
+    <fieldset><legend>Pace</legend><div class="seg" id="seg-pace"></div><p class="muted" id="pacehelp" style="margin:8px 0 0"></p></fieldset>
+    <fieldset><legend>Mode</legend><div class="seg" id="seg-mode"></div></fieldset>
+    <div class="row"><button class="btn primary big" id="start">Start</button><button class="btn" id="export" type="button">Download worksheet</button></div>
+  </div>
+  <div>
+    <h3 style="margin-bottom:8px">Key terms found in your PDF</h3>
+    <div class="chips" id="terms"></div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="v-quiz" class="qwrap" hidden>
+  <div class="hud">
+    <div class="prog"><span id="qnum" class="mono">1 / 10</span><div class="bar"><i id="pfill"></i></div></div>
+    <div class="hudr"><span id="hearts" class="hearts" aria-label="Lives left"></span><span id="streak" class="chip mono"></span><span id="gxp" class="chip mono">0 XP</span></div>
+  </div>
+  <div class="timer" id="timerw"><i id="tfill"></i></div>
+  <article class="card">
+    <div class="qmeta"><span id="qtype" class="tag"></span><span id="qpage" class="tag ghost"></span><button id="listen" class="link" type="button">Listen</button></div>
+    <p id="qprompt" class="prompt"></p>
+    <div id="qbody"></div>
+    <p id="hinttext" class="hinttext" hidden></p>
+    <div class="qtools"><button id="hint" class="btn" type="button">Hint</button><button id="quit" class="link" type="button">Quit</button></div>
+    <div id="fb" class="fb" aria-live="polite" hidden>
+      <p id="fbnote" class="note"></p>
+      <p id="fbsrc" class="src"></p>
+      <button id="next" class="btn primary">Next</button>
+    </div>
+  </article>
+</section>
+
+<!-- RESULT -->
+<section id="v-result" class="res" hidden></section>
+
+
+<!-- PROFILE -->
+<section id="v-profile" class="prof" hidden>
+  <button class="link" id="pback" style="justify-self:start">Back</button>
+  <div class="card">
+    <div class="phead">
+      <span class="avatar lg" id="pav2">S</span>
+      <div>
+        <label for="pname" class="muted" style="font-weight:800">Your name</label><br>
+        <input id="pname" class="pname" maxlength="24" autocomplete="off" placeholder="Type your name">
+        <div><span class="rank" id="prank"></span></div>
+      </div>
+    </div>
+    <fieldset style="margin:18px 0 0"><legend>Avatar colour</legend><div class="swatches" id="swatches"></div></fieldset>
+  </div>
+  <div class="stats" id="pstats"></div>
+  <div>
+    <h3 style="margin-bottom:8px">Badges earned</h3>
+    <div class="badges" id="pbadges"></div>
+  </div>
+  <div class="card dev">
+    <span class="avatar lg">AY</span>
+    <div>
+      <p class="muted" style="margin:0;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.8rem">Developer</p>
+      <h3>Ayush Yadav</h3>
+      <p class="muted" style="margin:4px 0 0">Chapter Quest version 1.0. Made to help school students learn from their own PDFs.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Reset progress</h3>
+    <p class="muted" style="margin:6px 0 12px">Sets XP, level and badges back to zero on this device. Your name and avatar stay.</p>
+    <button class="btn" id="preset" type="button">Reset progress</button>
+  </div>
+</section>
+
+<!-- FLASHCARDS -->
+<section id="v-cards" class="fc" hidden>
+  <div class="row" style="justify-content:space-between"><button class="link" id="cbak">Back</button><span id="cnum" class="mono"></span></div>
+  <div class="flip"><div class="card face" id="face" tabindex="0" role="button" aria-label="Flip card"></div></div>
+  <div class="row" style="justify-content:center">
+    <button class="btn" id="cprev">Previous</button>
+    <button class="btn" id="cflip">Flip</button>
+    <button class="btn primary" id="cnext">Next</button>
+  </div>
+</section>
+</main>
+<footer class="foot">Developed by <b>Ayush Yadav</b></footer>
+</div>
+
+<script src="lib/pdf.js"></script>
+<script src="lib/pdf.worker.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
